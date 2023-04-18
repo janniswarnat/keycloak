@@ -6,8 +6,8 @@ services:
         restart: "always"
         volumes:
             - "./pgdata:/var/lib/postgresql/data"
-        ports:
-            - 5432:5432
+#        ports:
+#            - 5432:5432
         environment:
             - POSTGRES_USER=keycloak
             - POSTGRES_PASSWORD=keycloak
@@ -19,10 +19,10 @@ services:
         restart: "always"
         depends_on:
             - "postgres"
-        entrypoint: ["/bin/sh","-c","rm --force /opt/keycloak/conf/server.keystore && keytool -genkeypair -storepass password -storetype PKCS12 -keyalg RSA -keysize 2048 -dname 'CN=server' -alias server -ext 'SAN:c=DNS:keycloak.localhost,IP:127.0.0.1' -keystore /opt/keycloak/conf/server.keystore && /opt/keycloak/bin/kc.sh start --db postgres --db-url-host postgres --db-username keycloak --db-password keycloak --proxy reencrypt --hostname keycloak.localhost"]
+        entrypoint: ["/bin/sh","-c","rm --force /opt/keycloak/conf/server.keystore && keytool -genkeypair -storepass password -storetype PKCS12 -keyalg RSA -keysize 2048 -dname 'CN=server' -alias server -ext 'SAN:c=DNS:keycloak,IP:127.0.0.1' -keystore /opt/keycloak/conf/server.keystore && /opt/keycloak/bin/kc.sh start --db postgres --db-url-host postgres --db-username keycloak --db-password keycloak --proxy reencrypt --hostname <hostname>"]
         environment:
             - KEYCLOAK_ADMIN=keycloak
-            - KEYCLOAK_ADMIN_PASSWORD=keycloak
+            - KEYCLOAK_ADMIN_PASSWORD=<***>
 
     nginx:
         image: "nginx"
@@ -30,8 +30,10 @@ services:
         restart: "always"
         depends_on:
             - "keycloak"
+        command: [nginx-debug, '-g', 'daemon off;']
         volumes:
-            - "./certs:/etc/nginx/certs"
+            - "/etc/letsencrypt/live/<hostname>/fullchain.pem:/etc/nginx/certs/fullchain.pem"
+            - "/etc/letsencrypt/live/<hostname>/privkey.pem:/etc/nginx/certs/privkey.pem"
             - "./nginx/conf.d:/etc/nginx/conf.d"
         ports:
             - 443:443
