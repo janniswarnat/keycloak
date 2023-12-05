@@ -1,7 +1,7 @@
 version: "3.5"
 services:
     postgres:
-        image: "postgres:10"
+        image: "postgres:15"
         container_name: "postgres"
         restart: "always"
         volumes:
@@ -14,7 +14,7 @@ services:
             - POSTGRES_DB=keycloak
 
     keycloak:
-        image: quay.io/keycloak/keycloak:21.0
+        image: quay.io/keycloak/keycloak:23.0
         container_name: "keycloak"
         restart: "always"
         depends_on:
