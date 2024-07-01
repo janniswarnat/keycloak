@@ -1,2 +1,3 @@
 .idea
 pgdata
+docker-compose.yml
